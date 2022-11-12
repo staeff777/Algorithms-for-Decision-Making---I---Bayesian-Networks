@@ -1,5 +1,6 @@
 package b_bayesian_network
 
+import de.vandermeer.asciitable.AsciiTable
 import guru.nidi.graphviz.engine.{Format, Graphviz}
 import guru.nidi.graphviz.parse.Parser
 import org.jgrapht.graph.{DefaultDirectedGraph, DefaultEdge}
@@ -7,8 +8,11 @@ import org.jgrapht.nio.dot.DOTExporter
 import org.jgrapht.nio.{Attribute, DefaultAttribute}
 
 import java.io.File
+import java.util.Locale
 import scala.collection.mutable
 import scala.util.Success
+import scala.jdk.CollectionConverters.*
+import java.text.NumberFormat
 
 case class Variable(name: String, states: Int) {
   override def toString = name
@@ -43,6 +47,48 @@ case class Factor(table: FactorTable) {
   def select_existing_variables_from_assignment(assignment: Assignment) =
     assignment.filter((variable, _) => variables.contains(variable)).toMap
 
+  /** An implementation * of the factor product, which constructs the factor representing the joint distribution of two
+    * smaller factors
+    *
+    * @param factor
+    */
+  def *(f2: Factor) = {
+    val f1                  = this
+    val unique_f2_variables = f2.variables.diff(f1.variables) // contains all variables that are not in f1 (e.g. X)
+    val unique_f2_assignments = f2.table
+      .map(_._1.filter(assignment => unique_f2_variables.contains(assignment._1)))
+      .toSet // contains all assignments e.g. X->0, X->1
+
+    val new_table = for ((f1_assignment, f1_p) <- f1.table; unique_f2_assignment <- unique_f2_assignments) yield {
+      val new_assignment = f1_assignment ++ unique_f2_assignment
+      val f2_assignment  = new_assignment.filter { case (k, _) => f2.variables.contains(k) }
+      val f2_p           = f2.table.getOrElse(f2_assignment, 0.0)
+
+      new_assignment -> f1_p * f2_p
+    }
+
+    Factor(new_table.toMap)
+  }
+
+  override def toString: String = {
+    val at     = new AsciiTable()
+    val header = variables.map(_.name).toArray :+ "P"
+    at.addRule()
+    at.addRow(header.toArray: _*)
+    at.addRule()
+
+    val nf = NumberFormat.getInstance(Locale.US)
+    nf.setMaximumFractionDigits(6)
+    def get(l: Vector[Int], i: Int) = l.lift(i).getOrElse(0)
+    def list_to_tuple(l: Vector[Int]) = // create a tuple list of variable values, for sorting
+      (get(l, 0), get(l, 1), get(l, 2), get(l, 3), get(l, 4), get(l, 5), get(l, 6), get(l, 7), get(l, 8))
+    for ((a, p) <- table.toArray.sortBy { x => list_to_tuple(x._1.toVector.map(_._2)) }) {
+      val row = a.map(_._2.toString).toArray :+ nf.format(p)
+      at.addRow(row.toArray: _*)
+    }
+    at.addRule()
+    at.render()
+  }
 }
 
 object Bayesian_Network {
@@ -88,7 +134,6 @@ object test extends App {
   val deviation     = Variable("Deviation", 2)
   val communication = Variable("Communication", 2)
 
-  val x = Assignment(battery -> 1)
   val bn = Bayesian_Network(
     Factor(Assignment(battery -> 1) -> 0.99, Assignment(battery -> 2) -> 0.01),
     Factor(Assignment(solar -> 1)   -> 0.98, Assignment(solar -> 2)   -> 0.02),
