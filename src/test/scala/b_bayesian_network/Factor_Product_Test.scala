@@ -3,7 +3,7 @@ package b_bayesian_network
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class factor_product_test extends AnyFlatSpec with Matchers {
+class Factor_Product_Test extends AnyFlatSpec with Matchers {
 
   val X = Variable("X", 2)
   val Y = Variable("Y", 2)

@@ -2,7 +2,7 @@ package b_bayesian_network
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should._
 
-class variables_and_factors_test extends AnyFlatSpec with Matchers {
+class Variables_And_Factors_Test extends AnyFlatSpec with Matchers {
 
   val variable1 = Variable("var1", 2)
   val variable2 = Variable("var2", 2)
