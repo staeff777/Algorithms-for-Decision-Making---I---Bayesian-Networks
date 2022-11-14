@@ -3,7 +3,7 @@ package b_bayesian_network
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 
-class Factor_Product_Test extends AnyFlatSpec with Matchers {
+class ExactInferenceTest extends AnyFlatSpec with Matchers {
 
   val X = Variable("X", 2)
   val Y = Variable("Y", 2)
@@ -56,5 +56,27 @@ class Factor_Product_Test extends AnyFlatSpec with Matchers {
     f.variables.size shouldBe 4
     f.table.size shouldBe 16
   }
+
+
+  "condition" should "work with a single evidence" in {
+    val f = f1 * f2
+    val cf = ExactInference.condition(f, X, 1)
+    cf.variables.size shouldBe 2
+    cf.table.size shouldBe 4
+    cf.table(Assignment( Y -> 0, Z -> 0)) shouldBe 0.04 +- 0.00001
+    cf.table(Assignment( Y -> 0, Z -> 1)) shouldBe 0.00
+    cf.table(Assignment( Y -> 1, Z -> 0)) shouldBe 0.03 +- 0.00001
+    cf.table(Assignment( Y -> 1, Z -> 1)) shouldBe 0.05 +- 0.00001
+  }
+
+  it should "work with multiple evidence" in {
+    val f = f1 * f2
+    val cf = ExactInference.condition(f, List((X, 1),(Y,0)))
+    cf.variables.size shouldBe 1
+    cf.table.size shouldBe 2
+    cf.table(Assignment( Z -> 0)) shouldBe 0.04 +- 0.00001
+    cf.table(Assignment( Z -> 1)) shouldBe 0.00
+  }
+
 
 }

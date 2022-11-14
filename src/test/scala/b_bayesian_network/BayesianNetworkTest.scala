@@ -3,7 +3,7 @@ package b_bayesian_network
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should._
 
-class Complete_Bayesian_Network_Test extends AnyFlatSpec with Matchers {
+class BayesianNetworkTest extends AnyFlatSpec with Matchers {
 
   val battery       = Variable("Battery", 2)
   val solar         = Variable("Solar", 2)
