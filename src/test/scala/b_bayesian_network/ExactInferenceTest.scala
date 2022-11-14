@@ -31,7 +31,6 @@ class ExactInferenceTest extends AnyFlatSpec with Matchers {
     Assignment(Z -> 1, A -> 1) -> 0.5
   )
 
-
   "Factor multiplaction" should "combine two factors with 2 variables" in {
     val f = f1 * f2
 
@@ -57,26 +56,36 @@ class ExactInferenceTest extends AnyFlatSpec with Matchers {
     f.table.size shouldBe 16
   }
 
+  "marginalize" should "recude a variable" in {
+    val f  = f1 * f2
+    val mf = ExactInference.marginalize(f, Y)
+    mf.variables.size shouldBe 2
+    mf.table.size shouldBe 4
+
+    mf.table(Assignment(X -> 0, Z -> 0)) shouldBe 0.18 +- 0.00001
+    mf.table(Assignment(X -> 0, Z -> 1)) shouldBe 0.2
+    mf.table(Assignment(X -> 1, Z -> 0)) shouldBe 0.07 +- 0.00001
+    mf.table(Assignment(X -> 1, Z -> 1)) shouldBe 0.05 +- 0.00001
+  }
 
   "condition" should "work with a single evidence" in {
-    val f = f1 * f2
+    val f  = f1 * f2
     val cf = ExactInference.condition(f, X, 1)
     cf.variables.size shouldBe 2
     cf.table.size shouldBe 4
-    cf.table(Assignment( Y -> 0, Z -> 0)) shouldBe 0.04 +- 0.00001
-    cf.table(Assignment( Y -> 0, Z -> 1)) shouldBe 0.00
-    cf.table(Assignment( Y -> 1, Z -> 0)) shouldBe 0.03 +- 0.00001
-    cf.table(Assignment( Y -> 1, Z -> 1)) shouldBe 0.05 +- 0.00001
+    cf.table(Assignment(Y -> 0, Z -> 0)) shouldBe 0.04 +- 0.00001
+    cf.table(Assignment(Y -> 0, Z -> 1)) shouldBe 0.00
+    cf.table(Assignment(Y -> 1, Z -> 0)) shouldBe 0.03 +- 0.00001
+    cf.table(Assignment(Y -> 1, Z -> 1)) shouldBe 0.05 +- 0.00001
   }
 
   it should "work with multiple evidence" in {
-    val f = f1 * f2
-    val cf = ExactInference.condition(f, List((X, 1),(Y,0)))
+    val f  = f1 * f2
+    val cf = ExactInference.condition(f, List((X, 1), (Y, 0)))
     cf.variables.size shouldBe 1
     cf.table.size shouldBe 2
-    cf.table(Assignment( Z -> 0)) shouldBe 0.04 +- 0.00001
-    cf.table(Assignment( Z -> 1)) shouldBe 0.00
+    cf.table(Assignment(Z -> 0)) shouldBe 0.04 +- 0.00001
+    cf.table(Assignment(Z -> 1)) shouldBe 0.00
   }
-
 
 }
