@@ -88,4 +88,10 @@ class ExactInferenceTest extends AnyFlatSpec with Matchers {
     cf.table(Assignment(Z -> 1)) shouldBe 0.00
   }
 
+  "infer" should "result in the correct normalized answer" in {
+
+
+   val f =  ExactInference.infer(BayesianNetworkTest.bayesian_network, Set(BayesianNetworkTest.solar), List((BayesianNetworkTest.deviation, 1), (BayesianNetworkTest.communication, 1)))
+    println(f)
+  }
 }

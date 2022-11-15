@@ -52,7 +52,6 @@ class VariablesAndFactorsTest extends AnyFlatSpec with Matchers {
       Assignment(variable1 -> 2, variable2 -> 2) -> 0.3
     )
     val factor2 = factor.normalize
-    println(factor2.table.values)
     factor2.table.values.sum shouldBe 1.0 +- 0.00001
   }
 

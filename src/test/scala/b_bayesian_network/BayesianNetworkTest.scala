@@ -3,7 +3,7 @@ package b_bayesian_network
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should._
 
-class BayesianNetworkTest extends AnyFlatSpec with Matchers {
+object BayesianNetworkTest {
 
   val battery       = Variable("Battery", 2)
   val solar         = Variable("Solar", 2)
@@ -11,8 +11,7 @@ class BayesianNetworkTest extends AnyFlatSpec with Matchers {
   val deviation     = Variable("Deviation", 2)
   val communication = Variable("Communication", 2)
 
-  val x = Assignment(battery -> 1)
-  val bayesian_network = Bayesian_Network(
+  val bayesian_network = BayesianNetwork(
     Factor(Assignment(battery -> 1) -> 0.99, Assignment(battery -> 2) -> 0.01),
     Factor(Assignment(solar -> 1)   -> 0.98, Assignment(solar -> 2)   -> 0.02),
     Factor(
@@ -44,18 +43,29 @@ class BayesianNetworkTest extends AnyFlatSpec with Matchers {
   bayesian_network.addEdge(energy, deviation)
   bayesian_network.addEdge(energy, communication)
 
+}
+class BayesianNetworkTest extends AnyFlatSpec with Matchers {
+
+  val x = Assignment(BayesianNetworkTest.battery -> 1)
+
   "The bayesian network" should "have 5 Factors" in {
-    assert(bayesian_network.factors.size == 5)
+    assert(BayesianNetworkTest.bayesian_network.factors.size == 5)
   }
 
   it should "return the correct probability for an assignment" in {
-    val as = Assignment(battery -> 1, solar -> 1, energy -> 1, deviation -> 1, communication -> 1)
-    bayesian_network.probability(as) shouldBe 0.82 +- 0.01
+    val as = Assignment(
+      BayesianNetworkTest.battery       -> 1,
+      BayesianNetworkTest.solar         -> 1,
+      BayesianNetworkTest.energy        -> 1,
+      BayesianNetworkTest.deviation     -> 1,
+      BayesianNetworkTest.communication -> 1
+    )
+    BayesianNetworkTest.bayesian_network.probability(as) shouldBe 0.82 +- 0.01
   }
 
-  "The Graphtools" should "render the network graph" in {
+  "Graphtools" should "render the network graph" in {
     if (GraphTools.default_file.exists()) GraphTools.default_file.delete()
-    GraphTools.renderToFile(bayesian_network.graph)
+    GraphTools.renderToFile(BayesianNetworkTest.bayesian_network.graph)
     assert(GraphTools.default_file.exists())
   }
 
